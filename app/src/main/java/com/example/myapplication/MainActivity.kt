@@ -3,36 +3,46 @@ package com.example.myapplication
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myapplication.Adapter.MyAdapter
-import com.example.myapplication.databaseFiles.UserViewModel
-import kotlinx.android.synthetic.main.activity_main.*
+import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.DataFile.Data
+import com.example.myapplication.Database.DataViewModel
+import com.example.myapplication.RecyclerViewAdapter.MyAdapter
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity() {
-    lateinit var userViewModel: UserViewModel
-    lateinit var adapter: MyAdapter
+    lateinit var userViewModel: DataViewModel
+    lateinit var recyclerView: RecyclerView
+    lateinit var addbtn: FloatingActionButton
+    var i: Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        userViewModel = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory(application)).get(UserViewModel::class.java)
         setContentView(R.layout.activity_main)
-        adapter = MyAdapter(this, userViewModel)
-        recycler_view.adapter = adapter
-        recycler_view.layoutManager = LinearLayoutManager(this)
-
-        userViewModel.all_Data.observe(this, {list ->
+        addbtn = findViewById(R.id.floatingActionButton)
+        userViewModel = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory(application)).get(DataViewModel::class.java)
+        recyclerView = findViewById(R.id.recycler_view)
+        val adapter = MyAdapter(this, userViewModel)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        userViewModel.all_Data.observe(this, {list->
             list?.let {
                 adapter.updateList(it)
+                i = adapter.sizeofdata()
             }
         })
 
-        floatingActionButton.setOnClickListener {
-            val intent = Intent(this@MainActivity, MainActivity2::class.java)
-            startActivity(intent)
+        addbtn.setOnClickListener {
+            gotoAddingPage()
         }
 
+    }
+
+    fun gotoAddingPage(){
+        val intent = Intent(this@MainActivity, addingData::class.java)
+        intent.putExtra("Rvalue", i)
+        startActivity(intent)
     }
 
 }
